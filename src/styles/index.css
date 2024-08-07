@@ -1,12 +1,23 @@
 
-/* 
 
-    You can write your own styles here...
-    
-    
-    ...Or you can use the import command to include 
-    other sylesheets into your bunde as well, e.j:
-    
-    import 'relative/path/to/stylesheet.scss';
+.list-group-item{
+    display: inline-flex;
+    justify-content: space-between;
+}
+.list-group-item:hover .x-container {
+    display: inline-flex;
+} 
+.x-container{
+    display: none;
 
-*/
+}
+.fa-x{
+    color: lightcoral;
+}
+.fa-x:hover{
+    color: red;
+}
+body{
+    font-family: "Roboto", sans-serif;
+    font-style: italic;
+}
