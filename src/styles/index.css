@@ -4,7 +4,7 @@
     display: inline-flex;
     justify-content: space-between;
 }
-.list-group-item:hover .x-container {
+.list-group-item:hover .x-container { 
     display: inline-flex;
 } 
 .x-container{
