@@ -1,20 +1,11 @@
 import React, { useEffect, useState } from "react";
-
+import { addUser, clearAll, fetchTodos, addTodoToApi, deleteTaskFromApi } from "../updateAPI";
 const Home = () => {
     const [inputValue, setInputValue] = useState("");
     const [todos, setTodos] = useState([]);
 
     useEffect(() => {
-        fetch('https://playground.4geeks.com/todo/users/GaretKean')
-            .then(response => {
-                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                return response.json();
-            })
-            .then(data => {
-                console.log("Fetched data:", data);
-                setTodos(data.todos || []); // Safeguard against undefined 'todos'
-            })
-            .catch(error => console.error("Error fetching tasks:", error));
+        fetchTodos(setTodos);
     }, []);
 
     const handleAddTodo = (e) => {
@@ -23,65 +14,48 @@ const Home = () => {
                 label: inputValue.trim(),
                 is_done: false
             };
+            setTodos([...todos, newTodo]);
 
-            fetch(`https://playground.4geeks.com/todo/todos/GaretKean`, {
-                method: "POST",
-                body: JSON.stringify(newTodo),
-                headers: {
-                    "Content-Type": "application/json"
-                }
-            })
-                .then(response => {
-                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                    return response.json();
-                })
-                .then(data => {
-                    console.log("Added new task:", data);
-                    setTodos([...todos, data]);
-                    setInputValue("");
-                })
-                .catch(error => console.error("Error adding task:", error));
+            addTodoToApi(todos, inputValue, setTodos);
+            console.log("Add new task to API:", newTodo.label);
+
+            setInputValue("");
+
+
+
         }
     };
 
     const handleDeleteTodo = (index) => {
-        const todoToDelete = todos[index];
+        const todoId = todos[index].id;
+        const todoLabel = todos[index].label;
         const newTodos = todos.filter((_, i) => i !== index);
         setTodos(newTodos);
 
-        fetch(`https://playground.4geeks.com/todo/todos/${todoToDelete.id}`, {
-            method: "DELETE",
-            headers: {
-                "Content-Type": "application/json"
-            }
-        })
-            .then(response => {
-                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                // Check if the response body is not empty
-                return response.text().then(text => text ? JSON.parse(text) : {});
-            })
-            .then(data => console.log("Deleted task on server:", data))
-            .catch(error => console.error("Error updating tasks:", error));
+        console.log("todo deleted successfully from api" + todoLabel);
+
+        deleteTaskFromApi(todoId, setTodos);
+
+        // fetch(`https://playground.4geeks.com/todo/todos/${todoToDelete.id}`, {
+        //     method: "DELETE",
+        //     headers: {
+        //         "Content-Type": "application/json"
+        //     }
+        // })
+        //     .then(response => {
+        //         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        //         // Check if the response body is not empty
+        //         return response.text().then(text => text ? JSON.parse(text) : {});
+        //     })
+        //     .then(data => console.log("Deleted task on server:", data))
+        //     .catch(error => console.error("Error updating tasks:", error));
     };
 
-    const addUser = () => {
+    const handleAddUser = () => {
 
 
-        fetch(`https://playground.4geeks.com/todo/users/GaretKean`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            }
-        })
-            .then(response => {
-                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                return response.json();
-            })
-            .then(data => {
-                console.log("Added new user: GaretKean", data);
+        addUser(setTodos);
 
-            })
-            .catch(error => console.error("Error adding user:", error));
 
 
 
@@ -91,39 +65,28 @@ const Home = () => {
 
 
     const handleClearAll = () => {
-        fetch(`https://playground.4geeks.com/todo/users/GaretKean`, {
-            method: "DELETE",
-            headers: {
-                "Content-Type": "application/json"
-            }
-        })
-            .then((response) => {
-                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                console.log("Deleted user: GaretKean");
-                // Clear the todos on the frontend
-                setTodos([]);
-            })
-            .catch((error) => console.error('Error deleting user:', error));
+        setTodos([]);
+        clearAll(setTodos);
     };
 
-    const updateTodo = (todo_id, updatedLabel) => {
-        fetch(`https://playground.4geeks.com/todo/todos/${todo_id}`, {
-            method: "PUT",
-            body: JSON.stringify({
-                label: updatedLabel,
-                is_done: false
-            }),
-            headers: {
-                "Content-Type": "application/json",
-            },
-        })
-            .then(response => {
-                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                return response.json();
-            })
-            .then(data => console.log("Updated todo:", data))
-            .catch(error => console.error("Error updating todo:", error));
-    };
+    // const updateTodo = (todo_id, updatedLabel) => {
+    //     fetch(`https://playground.4geeks.com/todo/todos/${todo_id}`, {
+    //         method: "PUT",
+    //         body: JSON.stringify({
+    //             label: updatedLabel,
+    //             is_done: false
+    //         }),
+    //         headers: {
+    //             "Content-Type": "application/json",
+    //         },
+    //     })
+    //         .then(response => {
+    //             if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+    //             return response.json();
+    //         })
+    //         .then(data => console.log("Updated todo:", data))
+    //         .catch(error => console.error("Error updating todo:", error));
+    // };
 
     return (
         <div className="container">
@@ -158,8 +121,8 @@ const Home = () => {
                     {todos.length} {todos.length === 1 ? "item" : "items"} left.
                 </div>
             </div>
-            <button onClick={addUser}>Add a new user</button>
-            <button onClick={handleClearAll}>Clear Tasks</button>
+            <button onClick={handleAddUser}>Add a new user</button>
+            <button onClick={handleClearAll}>Clear user & Tasks</button>
         </div>
     );
 };
